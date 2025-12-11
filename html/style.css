@@ -1,0 +1,82 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent scrollbars on the window itself */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* 1. Full Screen Layout */
+#visualization {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh; /* Force full height */
+    z-index: 1; /* Behind the menu button */
+}
+
+/* 2. Menu Button (Floating Top Left) */
+#menu-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000; /* On top of timeline */
+    background: white;
+    border: 1px solid #ccc;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-weight: bold;
+    color: #4a5568;
+}
+
+#menu-btn:hover { background: #f7fafc; }
+
+/* 3. Sidebar (Same as before) */
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 100%;
+    background: white;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+}
+#sidebar.open { transform: translateX(0); }
+
+/* Sidebar Internals */
+.sidebar-header { padding: 15px; background: #f7fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+.close-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
+.sidebar-controls { padding: 10px; border-bottom: 1px solid #eee; }
+#tag-search { width: 90%; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; }
+.bulk-buttons button { font-size: 12px; padding: 4px 8px; margin-right: 5px; cursor: pointer; }
+#filter-list { flex-grow: 1; overflow-y: auto; padding: 10px; }
+.filter-item { display: flex; align-items: center; padding: 5px; border-bottom: 1px solid #f7fafc; }
+.filter-item input { margin-right: 10px; }
+.sidebar-footer { padding: 15px; text-align: center; border-top: 1px solid #eee; }
+.refresh-btn { width: 100%; padding: 10px; background: #3182ce; color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+/* Timeline Items */
+.vis-item { border-width: 1px; font-size: 14px; }
+.vis-item.item-huge { font-size: 20px; border-width: 3px; z-index: 20; }
+.vis-item.item-large { font-size: 16px; border-width: 2px; z-index: 10; }
+
+/* Add this to the bottom of style.css */
+
+.vis-item {
+    z-index: 500 !important; /* Force items on top of everything */
+    border-width: 1px;
+    font-size: 14px;
+}
+
+#visualization {
+    z-index: 1;
+    background: transparent; /* Ensure background doesn't cover items */
+}

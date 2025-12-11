@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Org Roam Timeline</title>
+    <link href="https://unpkg.com/vis-timeline/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<button id="menu-btn" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i> Filters
+</button>
+
+<div id="sidebar">
+    <div class="sidebar-header">
+        <h3>Filter Tags</h3>
+        <button onclick="toggleSidebar()" class="close-btn">&times;</button>
+    </div>
+
+    <div class="sidebar-controls">
+        <input type="text" id="tag-search" placeholder="Search tags..." onkeyup="filterTagList()">
+        <div class="bulk-buttons">
+            <button onclick="toggleAll(true)">All</button>
+            <button onclick="toggleAll(false)">None</button>
+        </div>
+    </div>
+
+    <div id="filter-list"></div>
+    
+    <div class="sidebar-footer">
+        <button onclick="loadData()" class="refresh-btn">Reload Data</button>
+    </div>
+</div>
+
+<div id="visualization"></div>
+
+<script type="text/javascript" src="https://unpkg.com/vis-timeline/standalone/umd/vis-timeline-graph2d.min.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>
