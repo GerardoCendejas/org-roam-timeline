@@ -2,26 +2,26 @@ body, html {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Prevent scrollbars on the window itself */
+    overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* 1. Full Screen Layout */
+/* --- Layout --- */
 #visualization {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100vh; /* Force full height */
-    z-index: 1; /* Behind the menu button */
+    height: 100vh;
+    z-index: 1;
+    background: transparent;
 }
 
-/* 2. Menu Button (Floating Top Left) */
 #menu-btn {
     position: absolute;
     top: 20px;
     left: 20px;
-    z-index: 1000; /* On top of timeline */
+    z-index: 1000;
     background: white;
     border: 1px solid #ccc;
     padding: 8px 15px;
@@ -31,10 +31,9 @@ body, html {
     font-weight: bold;
     color: #4a5568;
 }
-
 #menu-btn:hover { background: #f7fafc; }
 
-/* 3. Sidebar (Same as before) */
+/* --- Sidebar --- */
 #sidebar {
     position: fixed;
     top: 0;
@@ -51,8 +50,8 @@ body, html {
 }
 #sidebar.open { transform: translateX(0); }
 
-/* Sidebar Internals */
 .sidebar-header { padding: 15px; background: #f7fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+.sidebar-header h3 { margin: 0; font-size: 16px; }
 .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
 .sidebar-controls { padding: 10px; border-bottom: 1px solid #eee; }
 #tag-search { width: 90%; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; }
@@ -63,20 +62,56 @@ body, html {
 .sidebar-footer { padding: 15px; text-align: center; border-top: 1px solid #eee; }
 .refresh-btn { width: 100%; padding: 10px; background: #3182ce; color: white; border: none; border-radius: 4px; cursor: pointer; }
 
-/* Timeline Items */
-.vis-item { border-width: 1px; font-size: 14px; }
-.vis-item.item-huge { font-size: 20px; border-width: 3px; z-index: 20; }
-.vis-item.item-large { font-size: 16px; border-width: 2px; z-index: 10; }
+/* --- Preview Panel --- */
+#preview-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 400px;
+    height: 100%;
+    background: white;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    z-index: 1002;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+}
+#preview-panel.open { transform: translateX(0); }
 
-/* Add this to the bottom of style.css */
+.preview-header { padding: 20px; background: #f7fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+.preview-header h3 { margin: 0; color: #2d3748; }
+.preview-actions { padding: 10px 20px; background: #fff; border-bottom: 1px solid #eee; }
+#open-emacs-btn { width: 100%; padding: 10px; background-color: #805ad5; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+#open-emacs-btn:hover { background-color: #6b46c1; }
 
+#preview-content {
+    flex-grow: 1;
+    padding: 30px;
+    overflow-y: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #2d3748;
+}
+
+/* Content Styling */
+#preview-content h1, #preview-content h2, #preview-content h3 { margin-top: 20px; margin-bottom: 10px; color: #1a202c; }
+#preview-content a { color: #3182ce; text-decoration: none; border-bottom: 1px dotted #3182ce; }
+#preview-content pre { background: #f7fafc; padding: 10px; border-radius: 4px; overflow-x: auto; border: 1px solid #e2e8f0; }
+mjx-container { overflow-x: auto; overflow-y: hidden; }
+
+/* --- Timeline Items & Animation --- */
 .vis-item {
-    z-index: 500 !important; /* Force items on top of everything */
+    /* FIX: Only animate visual properties, NOT position */
+    transition: opacity 0.2s ease-in-out, background-color 0.2s, border-color 0.2s;
+    z-index: 500; 
     border-width: 1px;
     font-size: 14px;
 }
+.vis-item.item-huge { font-size: 20px; border-width: 3px; z-index: 20; }
+.vis-item.item-large { font-size: 16px; border-width: 2px; z-index: 10; }
 
-#visualization {
-    z-index: 1;
-    background: transparent; /* Ensure background doesn't cover items */
-}
+/* Focus Mode */
+body.focus-mode .vis-item { opacity: 0.1 !important; border-color: #ccc !important; }
+body.focus-mode .vis-item.highlighted { opacity: 1 !important; box-shadow: 0 0 10px rgba(0,0,0,0.2); z-index: 1000 !important; }

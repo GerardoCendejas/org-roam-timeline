@@ -6,12 +6,13 @@
     <link href="https://unpkg.com/vis-timeline/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
     <link href="style.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 
-<button id="menu-btn" onclick="toggleSidebar()">
-    <i class="fas fa-bars"></i> Filters
-</button>
+<button id="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i> Filters</button>
 
 <div id="sidebar">
     <div class="sidebar-header">
@@ -36,8 +37,40 @@
 
 <div id="visualization"></div>
 
+<div id="preview-panel">
+    <div class="preview-header">
+        <h3 id="preview-title">Select a Node</h3>
+        <button onclick="closePreview()" class="close-btn">&times;</button>
+    </div>
+    <div class="preview-actions">
+        <button id="open-emacs-btn" onclick="openInEmacs()"><i class="fas fa-external-link-alt"></i> Open in Emacs</button>
+    </div>
+    <div id="preview-content">
+        <p class="placeholder-text">Click a timeline event to see details and connections.</p>
+    </div>
+</div>
+
 <script type="text/javascript" src="https://unpkg.com/vis-timeline/standalone/umd/vis-timeline-graph2d.min.js"></script>
 <script src="main.js"></script>
+
+<script>
+    document.getElementById('preview-content').addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (!link) return;
+        const href = link.getAttribute('href');
+        if (href && href.startsWith('id:')) {
+            e.preventDefault();
+            const id = href.replace('id:', '');
+            const item = rawData.get(id);
+            if (item) {
+                timeline.setSelection(id, { focus: true });
+                handleNodeSelect(item);
+            } else {
+                fetch(`/open?id=${id}`);
+            }
+        }
+    });
+</script>
 
 </body>
 </html>
