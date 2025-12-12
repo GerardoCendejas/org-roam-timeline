@@ -89,12 +89,20 @@
       if (targetId) {
           e.preventDefault();
           const item = rawData.get(targetId);
+          
           if (item) {
+              // CASE 1: It's on the timeline -> Jump to it
               timeline.setSelection(targetId, { focus: true });
-              timeline.focus(targetId, { animation: { duration: 500, easingFunction: 'easeInOutQuad' } });
+              // Use our smart focus function
+              focusOnNode(targetId);
               handleNodeSelect(item);
           } else {
-              fetch(`/open?id=${targetId}`);
+              // CASE 2: It's NOT on timeline -> Load content IN PLACE (Mini-Browser)
+              console.log("Node not on timeline. Browsing in panel...");
+              // We pass null title, the loader will extract it from the HTML
+              openInPanel(targetId, null);
+              
+              // We do NOT update selection or lines because the node isn't visual
           }
       }
   });

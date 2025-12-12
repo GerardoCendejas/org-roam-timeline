@@ -32,22 +32,30 @@ body, html {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* --- BUTTON RESET (The Fix) --- */
+button {
+    appearance: none; /* Remove OS styles */
+    -webkit-appearance: none;
+    font-family: inherit;
+    border: none;
+    outline: none;
+}
+
 /* --- Layout --- */
 #vis-container { position: relative; width: 100%; height: 100vh; }
 #visualization { width: 100%; height: 100%; z-index: 1; }
 #connection-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
-/* --- CONTROLS LAYOUT --- */
-.top-controls {
-    position: absolute; top: 20px; right: 20px; z-index: 2000;
-    display: flex; gap: 10px;
-}
+/* --- CONTROLS --- */
+.top-controls { position: absolute; top: 20px; right: 20px; z-index: 2000; display: flex; gap: 10px; }
+
 #menu-btn {
     position: absolute; top: 20px; left: 20px; z-index: 1000;
     background: var(--panel-bg); color: var(--text-main);
     border: 1px solid var(--border); padding: 10px 16px; border-radius: 8px;
     cursor: pointer; backdrop-filter: blur(var(--glass-blur));
 }
+
 .icon-btn {
     background: var(--panel-bg); color: var(--text-main);
     border: 1px solid var(--border); width: 40px; height: 40px;
@@ -57,20 +65,22 @@ body, html {
 .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
 .icon-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-/* --- BUTTON COLOR FIXES --- */
+/* --- BUTTON COLORS --- */
+/* High Specificity to override anything else */
 #sidebar .bulk-buttons button, 
 #sidebar .refresh-btn {
-    background-color: #2c313a !important; 
-    color: #bbc2cf !important;
+    background-color: var(--btn-bg) !important;
+    color: var(--text-main) !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s;
 }
 #sidebar .bulk-buttons button:hover, 
 #sidebar .refresh-btn:hover {
-    background-color: #3e4451 !important;
+    background-color: var(--btn-hover) !important;
     border-color: var(--accent) !important;
     color: #fff !important;
 }
+
 #preview-panel #open-emacs-btn {
     width: 100%; margin-top: 10px;
     background: linear-gradient(135deg, #a24eab, #6c3483) !important;
@@ -79,38 +89,14 @@ body, html {
     font-weight: 600; padding: 12px; border-radius: 8px; cursor: pointer;
 }
 #preview-panel #open-emacs-btn:hover { filter: brightness(1.1); }
+
+/* Light Mode Overrides */
 body.light-mode #sidebar .bulk-buttons button, 
 body.light-mode #sidebar .refresh-btn {
-    background-color: #edf2f7 !important; color: #2d3748 !important; border-color: #e2e8f0 !important;
+    background-color: #edf2f7 !important;
+    color: #2d3748 !important;
+    border-color: #e2e8f0 !important;
 }
-
-/* --- MODAL (The Nice Window) --- */
-.modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
-    z-index: 5000; display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.2s;
-}
-.modal-overlay.active { opacity: 1; pointer-events: auto; }
-
-.modal-content {
-    background: var(--bg-color); border: 1px solid var(--border);
-    padding: 25px; border-radius: 12px; width: 350px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    text-align: center; transform: scale(0.95); transition: transform 0.2s;
-}
-.modal-overlay.active .modal-content { transform: scale(1); }
-
-#modal-title { margin-top: 0; color: var(--text-main); }
-#modal-desc { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
-
-.modal-actions { display: flex; gap: 10px; justify-content: center; }
-.confirm-btn, .cancel-btn {
-    padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; border: 1px solid var(--border);
-}
-.confirm-btn { background: #e06c75; color: white; border-color: #e06c75; } /* Red for removal */
-.cancel-btn { background: transparent; color: var(--text-main); }
-.cancel-btn:hover { background: var(--btn-hover); }
 
 /* --- Timeline Items --- */
 .vis-item {
@@ -132,6 +118,7 @@ body.light-mode #sidebar .refresh-btn {
     display: flex; flex-direction: column; backdrop-filter: blur(var(--glass-blur));
 }
 #sidebar.open { transform: translateX(0); }
+
 #preview-panel {
     position: fixed; top: 80px; right: 20px; bottom: 20px; width: 450px;
     background: var(--panel-bg); border: 1px solid var(--border);
@@ -140,12 +127,15 @@ body.light-mode #sidebar .refresh-btn {
     backdrop-filter: blur(var(--glass-blur)); box-shadow: -10px 0 30px rgba(0,0,0,0.5);
 }
 #preview-panel.open { transform: translateX(0); }
+
 .sidebar-header, .preview-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 .sidebar-header h3, .preview-header h3 { margin: 0; font-size: 16px; color: var(--text-main); }
 .close-btn { background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
 .close-btn:hover { color: var(--accent); }
+
 .sidebar-controls { padding: 15px; border-bottom: 1px solid var(--border); }
 .sidebar-footer { padding: 15px; border-top: 1px solid var(--border); }
+
 input[type="text"] {
     width: 100%; background: rgba(0,0,0,0.1); border: 1px solid var(--border);
     color: var(--text-main); padding: 8px; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box;
@@ -153,10 +143,69 @@ input[type="text"] {
 #filter-list { flex-grow: 1; overflow-y: auto; padding: 10px; }
 .filter-item { padding: 5px 8px; display: flex; align-items: center; cursor: pointer; border-radius: 4px; }
 .filter-item:hover { background: rgba(255,255,255,0.05); }
+
 #preview-content { flex-grow: 1; padding: 25px; overflow-y: auto; line-height: 1.6; }
 #preview-content h1, h2, h3 { color: var(--text-main); margin-top: 1.5em; }
 #preview-content a { color: var(--accent) !important; text-decoration: none; border-bottom: 1px dotted var(--accent); font-weight: 500; }
 #preview-content a:hover { background: rgba(81, 175, 239, 0.1); border-bottom-style: solid; }
 #preview-content pre { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; overflow-x: auto; border: 1px solid var(--border); }
+
+#preview-content h1.node-title {
+    display: none;
+}
+
+/* Focus Mode */
 body.focus-mode .vis-item { opacity: 0.15; filter: grayscale(100%); }
 body.focus-mode .vis-item.highlighted { opacity: 1; filter: grayscale(0%); z-index: 500; border-color: var(--text-main); }
+
+/* --- MODAL --- */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+    z-index: 5000; display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-content {
+    background: var(--bg-color); border: 1px solid var(--border);
+    padding: 25px; border-radius: 12px; width: 350px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center;
+}
+#modal-title { margin-top: 0; color: var(--text-main); }
+#modal-desc { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+.modal-actions { display: flex; gap: 10px; justify-content: center; }
+.confirm-btn, .cancel-btn { padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; border: 1px solid var(--border); }
+.confirm-btn { background: #e06c75; color: white; border-color: #e06c75; }
+.cancel-btn { background: transparent; color: var(--text-main); }
+.cancel-btn:hover { background: var(--btn-hover); }
+
+/* --- TOOLTIPS (Bubble Style) --- */
+div.vis-tooltip {
+    background-color: var(--panel-bg) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-main) !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+    backdrop-filter: blur(12px) !important;
+    z-index: 99999 !important;
+}
+
+.tooltip-tag {
+    display: inline-block;
+    /* background & color removed here, handled inline */
+    border: 1px solid transparent; 
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 4px;
+    margin-top: 4px;
+}
+
+body.light-mode .tooltip-tag {
+    color: #2c5282; background: rgba(49, 130, 206, 0.1); border-color: rgba(49, 130, 206, 0.3);
+}

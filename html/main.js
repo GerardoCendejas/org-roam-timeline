@@ -1,14 +1,33 @@
-// main.js - FINAL
+// main.js - FINAL (DOM Element Edition)
 
 var rawData = new vis.DataSet([]);
 var activeTags = new Set();
 var allKnownTags = []; 
 var currentSelectedId = null;
-var showLinks = true;     
-var autoOpenPreview = true;
 var pendingRemoveId = null; 
 
-// --- Filter ---
+// Default Config
+var showLinks = true;     
+var autoOpenPreview = true;
+var followModeEnabled = true;
+var zoomWindowYears = 5;
+
+// --- 1. Init ---
+function loadConfigAndData() {
+    fetch('/config').then(r => r.json()).then(config => {
+        if (config.theme === 'light') document.body.classList.add('light-mode');
+        else document.body.classList.remove('light-mode');
+        
+        showLinks = config.showLinks;
+        followModeEnabled = config.followMode;
+        zoomWindowYears = config.zoomWindow;
+        
+        updateButtonStates();
+        loadData();
+    }).catch(e => loadData());
+}
+
+// --- 2. Setup ---
 const filterRules = function(item) {
     if (!item) return false;
     if (activeTags.size === 0) return false;
@@ -18,13 +37,88 @@ const filterRules = function(item) {
 
 var dataView = new vis.DataView(rawData, { filter: filterRules });
 var container = document.getElementById('visualization');
+
+// --- THE FIX: DOM ELEMENT TEMPLATE ---
 var options = {
-    orientation: 'bottom', zoomKey: 'ctrlKey', horizontalScroll: true,
-    stack: true, height: '100%', width: '100%', selectable: true, multiselect: false
+    orientation: 'bottom', 
+    zoomKey: 'ctrlKey', 
+    horizontalScroll: true,
+    stack: true, 
+    height: '100%', 
+    width: '100%', 
+    selectable: true, 
+    multiselect: false,
+    
+    tooltip: { 
+        followMouse: true, 
+        overflowMethod: 'cap',
+        // We return a DOM Node, not a String. Browser cannot strip styles from this.
+        template: function(item, element) {
+            const container = document.createElement('div');
+            container.style.textAlign = 'left';
+            
+            // 1. Title
+            const titleEl = document.createElement('strong');
+            titleEl.innerText = item.content;
+            titleEl.style.display = 'block';
+            titleEl.style.fontSize = '14px';
+            titleEl.style.marginBottom = '4px';
+            container.appendChild(titleEl);
+            
+            // 2. Date
+            const sDate = new Date(item.start);
+            const startStr = isNaN(sDate) ? item.start : sDate.getFullYear();
+            let dateStr = startStr;
+            if (item.end) {
+                const eDate = new Date(item.end);
+                const endStr = isNaN(eDate) ? item.end : eDate.getFullYear();
+                dateStr = `${startStr} — ${endStr}`;
+            }
+            
+            const dateEl = document.createElement('span');
+            dateEl.innerText = dateStr;
+            dateEl.style.color = 'var(--text-muted, #888)';
+            dateEl.style.fontSize = '12px';
+            container.appendChild(dateEl);
+            
+            // 3. PILLS (Built as Elements)
+            if (item.all_tags && item.all_tags.length > 0) {
+                const pillContainer = document.createElement('div');
+                pillContainer.style.marginTop = '8px';
+                
+                const isLight = document.body.classList.contains('light-mode');
+                const txtColor = isLight ? '#333' : '#fff';
+
+                item.all_tags.forEach(tag => {
+                    const color = stringToColor(tag);
+                    const pill = document.createElement('span');
+                    pill.innerText = tag;
+                    
+                    // Force Styles directly on the element
+                    pill.style.display = 'inline-block';
+                    pill.style.backgroundColor = color;
+                    pill.style.border = `1px solid ${color}`;
+                    pill.style.color = txtColor;
+                    pill.style.padding = '2px 8px';
+                    pill.style.borderRadius = '12px';
+                    pill.style.fontSize = '11px';
+                    pill.style.fontWeight = '600';
+                    pill.style.marginRight = '4px';
+                    pill.style.marginTop = '4px';
+                    
+                    pillContainer.appendChild(pill);
+                });
+                container.appendChild(pillContainer);
+            }
+            
+            return container;
+        }
+    }
 };
+
 var timeline = new vis.Timeline(container, dataView, options);
 
-// --- CANVAS ---
+// --- 3. Canvas ---
 const canvas = document.getElementById('connection-layer');
 const ctx = canvas.getContext('2d');
 function resizeCanvas() {
@@ -55,30 +149,50 @@ function drawConnections() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!showLinks) return;
     const isLight = document.body.classList.contains('light-mode');
-    ctx.strokeStyle = isLight ? "rgba(49, 130, 206, 0.4)" : "rgba(81, 175, 239, 0.4)";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    const drawnPairs = new Set();
-    dataView.forEach(item => {
-        if (!item.neighbors) return;
-        const start = getCenter(item.id);
-        if (!start) return; 
-        item.neighbors.forEach(nid => {
-            if (!dataView.get(nid)) return; 
-            const pairKey = [item.id, nid].sort().join('|');
-            if (drawnPairs.has(pairKey)) return;
-            drawnPairs.add(pairKey);
+    
+    if (currentSelectedId) {
+        const centerItem = rawData.get(currentSelectedId);
+        if (!centerItem || !centerItem.neighbors) return;
+        const start = getCenter(currentSelectedId);
+        if (!start) return;
+        ctx.strokeStyle = "rgba(81, 175, 239, 0.9)"; 
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        centerItem.neighbors.forEach(nid => {
+            if (!dataView.get(nid)) return;
             const end = getCenter(nid);
             if (end) {
                 ctx.moveTo(start.x, start.y);
                 ctx.lineTo(end.x, end.y);
             }
         });
-    });
-    ctx.stroke();
+        ctx.stroke();
+    } else {
+        ctx.strokeStyle = isLight ? "rgba(0,0,0, 0.05)" : "rgba(255,255,255, 0.05)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        const drawnPairs = new Set();
+        dataView.forEach(item => {
+            if (!item.neighbors) return;
+            const start = getCenter(item.id);
+            if (!start) return; 
+            item.neighbors.forEach(nid => {
+                if (!dataView.get(nid)) return;
+                const pairKey = [item.id, nid].sort().join('|');
+                if (drawnPairs.has(pairKey)) return;
+                drawnPairs.add(pairKey);
+                const end = getCenter(nid);
+                if (end) {
+                    ctx.moveTo(start.x, start.y);
+                    ctx.lineTo(end.x, end.y);
+                }
+            });
+        });
+        ctx.stroke();
+    }
 }
 
-// --- Interaction ---
+// --- 4. Interaction ---
 timeline.on('click', function (properties) {
     const clickedId = properties.item;
     if (clickedId) {
@@ -89,7 +203,7 @@ timeline.on('click', function (properties) {
     }
 });
 
-// REMOVAL CONFIRMATION
+// REMOVAL
 timeline.on('contextmenu', function (props) {
     props.event.preventDefault();
     const id = props.item;
@@ -104,7 +218,6 @@ function showConfirmModal(id, title) {
     document.getElementById('modal-title').innerText = `Hide "${title}"?`;
     document.getElementById('confirm-modal').classList.add('active');
 }
-
 window.closeModal = function(confirmed) {
     document.getElementById('confirm-modal').classList.remove('active');
     if (confirmed && pendingRemoveId) {
@@ -116,7 +229,7 @@ window.closeModal = function(confirmed) {
 
 function handleNodeSelect(item) {
     currentSelectedId = item.id;
-    if (autoOpenPreview) openPreviewPanel(item);
+    if (autoOpenPreview) openInPanel(item.id, item.content);
     highlightNetwork(item);
     requestAnimationFrame(drawConnections);
 }
@@ -124,14 +237,18 @@ function handleNodeSelect(item) {
 function focusOnNode(id) {
     const item = rawData.get(id);
     if (!item) return;
+    let centerDate;
     if (item.type === 'point') {
-        const d = new Date(item.start);
-        const start = new Date(d); start.setFullYear(d.getFullYear() - 5);
-        const end = new Date(d); end.setFullYear(d.getFullYear() + 5);
-        timeline.setWindow(start, end, { animation: { duration: 800 } });
+        centerDate = new Date(item.start).getTime();
     } else {
-        timeline.focus(id, { animation: { duration: 800 } });
+        const s = new Date(item.start).getTime();
+        const e = new Date(item.end).getTime();
+        centerDate = s + (e - s) / 2;
     }
+    const center = new Date(centerDate);
+    const start = new Date(center); start.setFullYear(center.getFullYear() - zoomWindowYears);
+    const end = new Date(center); end.setFullYear(center.getFullYear() + zoomWindowYears);
+    timeline.setWindow(start, end, { animation: { duration: 800 } });
     timeline.setSelection(id, { focus: false });
 }
 
@@ -148,14 +265,23 @@ function highlightNetwork(centerItem) {
     rawData.update(updates);
 }
 
-function openPreviewPanel(item) {
+function openInPanel(id, title) {
     const panel = document.getElementById('preview-panel');
-    document.getElementById('preview-title').innerText = item.content;
     const contentBox = document.getElementById('preview-content');
+    const titleHeader = document.getElementById('preview-title');
+    titleHeader.innerText = title || "Loading...";
     contentBox.innerHTML = "<div style='text-align:center; padding:20px;'><i class='fas fa-spinner fa-spin'></i> Loading...</div>";
     panel.classList.add('open');
-    fetch(`/content?id=${item.id}`).then(r=>r.text()).then(html => {
+    fetch(`/content?id=${id}`).then(r=>r.text()).then(html => {
         contentBox.innerHTML = html.trim().length ? html : "<p><i>No content.</i></p>";
+        const h1 = contentBox.querySelector('h1.node-title');
+        if (h1) {
+            titleHeader.innerText = h1.innerText;
+            h1.style.display = 'none';
+        } else if (!title) {
+            const firstHeader = contentBox.querySelector('h1, h2');
+            if(firstHeader) titleHeader.innerText = firstHeader.innerText;
+        }
         if (window.MathJax) MathJax.typesetPromise([contentBox]).catch(e=>{});
     }).catch(e => contentBox.innerHTML = "Error.");
 }
@@ -169,9 +295,9 @@ function closePreview() {
         updates.push({ id: item.id, className: (item.className||"").replace(' highlighted', '') });
     });
     rawData.update(updates);
+    requestAnimationFrame(drawConnections);
 }
 
-// --- Helpers ---
 function stringToColor(str) {
     let hash = 0;
     for (let i=0; i<str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -190,13 +316,10 @@ function assignColorToItem(item) {
 function toggleTheme() {
     document.body.classList.toggle('light-mode');
     const updates = [];
-    rawData.forEach(item => {
-        assignColorToItem(item);
-        updates.push(item);
-    });
+    rawData.forEach(item => { assignColorToItem(item); updates.push(item); });
     rawData.update(updates);
     renderFilters();
-    if (showLinks) drawConnections();
+    requestAnimationFrame(drawConnections);
 }
 function loadData() {
     fetch('/data').then(r=>r.json()).then(data => {
@@ -205,6 +328,9 @@ function loadData() {
             if(!item.all_tags) item.all_tags = ["Uncategorized"];
             item.all_tags.forEach(t=>uniqueTags.add(t));
             assignColorToItem(item);
+            
+            // REMOVE BRUTE FORCE: We rely on the template options now
+            // item.title = generateTooltipHTML(item); <--- Removed
         });
         allKnownTags = [...uniqueTags].sort();
         if(activeTags.size===0) activeTags = new Set(allKnownTags);
@@ -256,50 +382,45 @@ function openInEmacs() { if(currentSelectedId) fetch(`/open?id=${currentSelected
 function toggleLinks() {
     showLinks = !showLinks;
     updateButtonStates();
-    if(showLinks) requestAnimationFrame(drawConnections); 
-    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    requestAnimationFrame(drawConnections);
 }
 function togglePreviewMode() {
     autoOpenPreview = !autoOpenPreview;
     updateButtonStates();
 }
-
-// SMART POLL (Handles Follow Mode & Explicit Show)
 let lastFocusId = null;
 setInterval(() => {
-    fetch('/current-focus')
-        .then(r => r.text())
-        .then(id => {
-            if (id && id.length > 0) {
-                // If it's a new ID, we must handle it
-                if (id !== lastFocusId) {
-                    lastFocusId = id;
-                    
-                    const item = rawData.get(id);
-                    if (item) {
-                        // It's already here -> Focus
-                        focusOnNode(id);
-                        handleNodeSelect(item);
-                    } else {
-                        // IT'S MISSING! Fetch and add it.
-                        console.log("Fetching missing node:", id);
-                        fetch(`/node-data?id=${id}`)
-                            .then(r => r.json())
-                            .then(newItem => {
-                                if (newItem && newItem.id) {
-                                    if(!newItem.all_tags) newItem.all_tags = ["Uncategorized"];
-                                    assignColorToItem(newItem);
-                                    rawData.add(newItem);
-                                    // Now focus
-                                    focusOnNode(newItem.id);
-                                    handleNodeSelect(newItem);
-                                }
-                            });
-                    }
-                }
+    if (!followModeEnabled) return;
+    fetch('/current-focus').then(r=>r.text()).then(id => {
+        if(id && id!==lastFocusId) {
+            lastFocusId = id;
+            const item = rawData.get(id);
+            if(item) {
+                focusOnNode(id);
+                handleNodeSelect(item);
             }
-        })
-        .catch(e => {}); // Silent fail
-}, 1000); // Check every 1 second
-
-loadData();
+        }
+    }).catch(e=>{});
+}, 2000);
+function checkUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    const showId = params.get('show');
+    if (showId) {
+        const existing = rawData.get(showId);
+        if (existing) { focusOnNode(showId); handleNodeSelect(existing); }
+        else {
+            fetch(`/node-data?id=${showId}`).then(r=>r.json()).then(item => {
+                if (item && item.id) {
+                    if(!item.all_tags) item.all_tags = ["Uncategorized"];
+                    assignColorToItem(item);
+                    rawData.add(item);
+                    focusOnNode(item.id);
+                    handleNodeSelect(item);
+                }
+            });
+        }
+        window.history.replaceState({}, document.title, "/");
+    }
+}
+loadConfigAndData();
+checkUrlParams();
