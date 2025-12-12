@@ -13,6 +13,18 @@
 
 <button id="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i> Filters</button>
 
+<div class="top-controls">
+    <button id="link-btn" onclick="toggleLinks()" class="icon-btn" title="Toggle Connection Lines">
+        <i class="fas fa-project-diagram"></i>
+    </button>
+    <button id="preview-toggle-btn" onclick="togglePreviewMode()" class="icon-btn active" title="Auto-Open Details">
+        <i class="fas fa-columns"></i>
+    </button>
+    <button id="theme-btn" onclick="toggleTheme()" class="icon-btn" title="Toggle Theme">
+        <i class="fas fa-adjust"></i>
+    </button>
+</div>
+
 <div id="sidebar">
     <div class="sidebar-header">
         <h3>Filter Tags</h3>
@@ -27,11 +39,14 @@
     </div>
     <div id="filter-list"></div>
     <div class="sidebar-footer">
-        <button onclick="loadData()" class="refresh-btn">Reload Data</button>
+        <button onclick="loadData()" class="refresh-btn"><i class="fas fa-sync-alt"></i> Reload / Unhide All</button>
     </div>
 </div>
 
-<div id="visualization"></div>
+<div id="vis-container">
+    <canvas id="connection-layer"></canvas>
+    <div id="visualization"></div>
+</div>
 
 <div id="preview-panel">
     <div class="preview-header">
@@ -42,7 +57,18 @@
         <button id="open-emacs-btn" onclick="openInEmacs()"><i class="fas fa-external-link-alt"></i> Open in Emacs</button>
     </div>
     <div id="preview-content">
-        <p class="placeholder-text">Click a timeline event to see details and connections.</p>
+        <p class="placeholder-text">Click a timeline event to see details.</p>
+    </div>
+</div>
+
+<div id="confirm-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 id="modal-title">Hide Node?</h3>
+        <p id="modal-desc">This will hide the node from the view. Reload data to restore it.</p>
+        <div class="modal-actions">
+            <button onclick="closeModal(false)" class="cancel-btn">Cancel</button>
+            <button onclick="closeModal(true)" class="confirm-btn">Hide</button>
+        </div>
     </div>
 </div>
 
@@ -50,58 +76,29 @@
 <script src="main.js"></script>
 
 <script>
-  // Advanced Link Handler
   document.getElementById('preview-content').addEventListener('click', function(e) {
-      // Find the closest anchor tag
       const link = e.target.closest('a');
       if (!link) return;
-
       const href = link.getAttribute('href');
       if (!href) return;
 
-      console.log("Clicked link:", href);
-
       let targetId = null;
-
-      // CASE 1: Clean "id:uuid" links (Backlinks & Internal)
-      if (href.startsWith('id:')) {
-          targetId = href.replace('id:', '');
-      }
-      // CASE 2: Messy "file.html#ID-uuid" links (Standard Export)
-      // Matches anything ending in #ID-uuid or just #uuid
-      else if (href.includes('#')) {
-          // Extract the hash part
-          const hash = href.split('#')[1];
-          // Remove "ID-" prefix if present
-          targetId = hash.replace(/^ID-/, '');
-      }
+      if (href.startsWith('id:')) targetId = href.replace('id:', '');
+      else if (href.includes('#')) targetId = href.split('#')[1].replace(/^ID-/, '');
 
       if (targetId) {
-          e.preventDefault(); // Stop browser from redirecting
-          console.log("Extracted ID:", targetId);
-
-          // Check if this node exists in our timeline data
+          e.preventDefault();
           const item = rawData.get(targetId);
-          
           if (item) {
-              // SCENARIO A: Node is on the timeline -> Jump to it
-              console.log("Node found on timeline. Selecting...");
               timeline.setSelection(targetId, { focus: true });
               timeline.focus(targetId, { animation: { duration: 500, easingFunction: 'easeInOutQuad' } });
               handleNodeSelect(item);
           } else {
-              console.log("Node not on timeline. Loading content directly...");
-              
-              const fakeItem = { id: targetId, content: "Linked Note" };
-              handleNodeSelect(fakeItem);
-
-	  }
-
+              fetch(`/open?id=${targetId}`);
+          }
       }
-
   });
 </script>
-
 
 </body>
 </html>
