@@ -105,8 +105,8 @@ Org-Roam Timeline uses tags to categorize and filter nodes, so I highly encourag
 
 ## Features
 - Bi-Directional Sync:
-  - Emacs \to Browser: Command `org-roam-timeline-show-node` instantly focuses and zooms to the node in the timeline.
-  - Browser \to Emacs: Clicking "Open in Emacs" jumps to the exact node in your buffer.
+  - Emacs to Browser: Command `org-roam-timeline-show-node` instantly focuses and zooms to the node in the timeline.
+  - Browser to Emacs: Clicking "Open in Emacs" jumps to the exact node in your buffer.
 - Focus Mode: Selecting a node dims unrelated items and highlights only the direct connections (links).
 - Visual Filtering:
   - Include: Left-click tags to filter the view.
