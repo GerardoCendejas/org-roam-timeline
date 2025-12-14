@@ -21,7 +21,7 @@ It is designed for researchers, historians, and anyone who needs to see **when**
 
 ```bash
 
-git clone git@github.com:GerardoCendejas/org-roam-timeline.git
+git clone https://github.com/GerardoCendejas/org-roam-timeline.git
 
 ```
 
@@ -128,6 +128,8 @@ You can manipulate these filters and behaviours without leaving your emacs.
 - org-roam-timeline-filter-hide-all: hide all nodes, from there, you decide what to see.
 
 ![org-roam-timeline-follow](media/follow.gif)
+
+What can you use this for? Whether you are mapping historical data (events, wars, bibliography dates), project management (deliverables, deadlines, ideas) or tracking the evolution of your own mind (dating your dailies to see how your ideas changed over time), if you can give it a timestamp, org-roam-timeline will show it to you.
 
 ## Licence
 
