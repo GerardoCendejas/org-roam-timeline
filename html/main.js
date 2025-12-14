@@ -1,4 +1,4 @@
-// main.js - FINAL (Preview Toggle Support)
+// main.js 
 
 var rawData = new vis.DataSet([]);
 var activeTags = new Set();
@@ -23,7 +23,6 @@ function loadConfigAndData() {
         showLinks = config.showLinks;
         followModeEnabled = config.followMode;
         zoomWindowYears = config.zoomWindow;
-        // NEW: Load autoPreview setting from Emacs custom variable
         autoOpenPreview = config.autoPreview; 
         
         updateButtonStates();
@@ -31,7 +30,7 @@ function loadConfigAndData() {
     }).catch(e => loadData());
 }
 
-// --- 2. Filter Logic (Same as before) ---
+// --- 2. Filters  ---
 const filterRules = function(item) {
     if (!item) return false;
     if (forcedVisibleIds.has(item.id)) return true;
@@ -44,7 +43,7 @@ const filterRules = function(item) {
 var dataView = new vis.DataView(rawData, { filter: filterRules });
 var container = document.getElementById('visualization');
 
-// --- Tooltip & Options (Same as before) ---
+// --- Tooltip & Options ---
 var options = {
     orientation: 'bottom', zoomKey: 'ctrlKey', horizontalScroll: true,
     stack: true, height: '100%', width: '100%', selectable: true, multiselect: false,
@@ -91,7 +90,7 @@ var options = {
 
 var timeline = new vis.Timeline(container, dataView, options);
 
-// --- 3. Canvas & Drawing (Same as before) ---
+// --- 3. Canvas & Drawing ---
 const canvas = document.getElementById('connection-layer');
 const ctx = canvas.getContext('2d');
 function resizeCanvas() {
@@ -180,7 +179,7 @@ function handleNodeSelect(item) {
     requestAnimationFrame(drawConnections);
 }
 
-// --- 5. RENDER FILTERS (Same as before) ---
+// --- 5. RENDER FILTERS ---
 function renderFilters() {
     const container = document.getElementById('filter-list');
     if (!container) return;
@@ -234,7 +233,7 @@ function renderFilters() {
     });
 }
 
-// --- 6. Polling & Signals (Updated) ---
+// --- 6. Polling & Signals ---
 let lastFocusId = null;
 setInterval(() => {
     fetch('/current-focus').then(r=>r.json()).then(resp => {
@@ -258,7 +257,7 @@ setInterval(() => {
 
         // --- GLOBAL TOGGLES ---
         else if (resp.action === "toggle-follow") { toggleFollowMode(); }
-        else if (resp.action === "toggle-preview") { togglePreviewMode(); } // NEW
+        else if (resp.action === "toggle-preview") { togglePreviewMode(); } 
 
         // --- SPECIFIC ACTIONS ---
         else if (resp.action === "zoom-date" && resp.date) { handleDateZoom(resp.date); }
@@ -277,7 +276,7 @@ setInterval(() => {
     }).catch(e=>{});
 }, 1000);
 
-// --- Helpers (Same as before) ---
+// --- Helpers ---
 function handleDateZoom(dateStr) {
     let start, end;
     const parts = dateStr.split('-');

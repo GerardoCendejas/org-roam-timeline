@@ -95,7 +95,7 @@ body.focus-mode .vis-item.highlighted { opacity: 1; filter: grayscale(0%); z-ind
 input[type="text"] { width: 100%; background: rgba(0,0,0,0.1); border: 1px solid var(--border); color: var(--text-main); padding: 8px; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box; }
 .close-btn { background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
 
-/* --- NEW FILTER ITEM LAYOUT --- */
+/* --- FILTER ITEM LAYOUT --- */
 .filter-item {
     display: flex;
     justify-content: space-between; /* Space between Label and Eye */

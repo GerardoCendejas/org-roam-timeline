@@ -13,7 +13,7 @@
 (defvar org-roam-timeline--explicit-date-focus nil)
 (defvar org-roam-timeline--filter-signal nil)
 (defvar org-roam-timeline--toggle-follow-signal nil)
-(defvar org-roam-timeline--toggle-preview-signal nil) ;; NEW: Toggle Preview Signal
+(defvar org-roam-timeline--toggle-preview-signal nil) 
 
 ;; --- HELPER: Get All Tags ---
 (defun org-roam-timeline--get-all-tags ()
@@ -25,9 +25,9 @@
 (defcustom org-roam-timeline-focus-window-years 5 "Zoom window." :type 'integer)
 (defcustom org-roam-timeline-show-links-on-start t "Show lines on start." :type 'boolean)
 (defcustom org-roam-timeline-follow-mode-on-start t "Follow mode active on start." :type 'boolean)
-(defcustom org-roam-timeline-preview-on-start t "Auto-open preview panel on start." :type 'boolean) ;; NEW
+(defcustom org-roam-timeline-preview-on-start t "Auto-open preview panel on start." :type 'boolean) 
 
-;; --- DATA PROCESSING (Same as before) ---
+;; --- DATA PROCESSING ---
 (defun org-roam-timeline--process-node (node)
   (condition-case err
       (let* ((props (org-roam-node-properties node))
@@ -98,7 +98,7 @@
   (insert (json-encode `((theme . ,(symbol-name org-roam-timeline-default-theme)) 
                          (showLinks . ,(if org-roam-timeline-show-links-on-start t :json-false)) 
                          (followMode . ,(if org-roam-timeline-follow-mode-on-start t :json-false)) 
-                         (autoPreview . ,(if org-roam-timeline-preview-on-start t :json-false)) ;; NEW
+                         (autoPreview . ,(if org-roam-timeline-preview-on-start t :json-false)) 
                          (zoomWindow . ,org-roam-timeline-focus-window-years)))))
 
 (defservlet* data text/json () (insert (json-encode (org-roam-timeline--get-nodes))))
@@ -106,7 +106,7 @@
   (let ((node (org-roam-node-from-id id))) (if node (let ((item (org-roam-timeline--process-node node))) (if item (insert (json-encode item)) (insert "{}"))) (insert "{}"))))
 (defservlet* open text/plain (id) (let ((node (org-roam-node-from-id id))) (if node (progn (with-current-buffer (window-buffer (selected-window)) (org-roam-node-open node)) (insert "Opened")) (insert "Node not found"))))
 
-;; --- POLLING SERVLET (Updated) ---
+;; --- POLLING SERVLET ---
 (defservlet* current-focus text/json ()
   (let ((response '((action . "none"))))
     
