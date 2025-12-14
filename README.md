@@ -11,7 +11,7 @@
 
 Org-Roam-Timeline creates an interactive, browser-based timeline of your [org-roam](https://github.com/org-roam/org-roam) notes, allowing you to visualize historical context, filter by tags, and seamlessly navigate between your timeline and your text editor.
 
-It is designed for researchers, historians, and anyone who needs to see /when/ their ideas happened, not just how they link together.
+It is designed for researchers, historians, and anyone who needs to see **when** their ideas happened, not just how they link together.
 
 ## Installation
 
@@ -63,7 +63,7 @@ You then should add something like this to your `init.el`, this are the keybindi
 
 ```
 
-Check other functions included that you could bind if you want complete control from emacs, such as 
+Check other functions included that you could bind if you want complete control from emacs.
 
 ### Customization
 
@@ -99,9 +99,9 @@ Org-Roam Timeline uses tags to categorize and filter nodes, so I highly encourag
 - Zoom: Ctrl + Mouse Wheel to zoom in/out.
 - Focus: Click any node to "Focus". This dims other nodes but the ones connected to this.
 - Follow Mode: If enabled, moving your cursor in Emacs will automatically pan the timeline to that node (if it has a date).
-- Hard Block: In the sidebar, click the Eye Icon next to a tag to hide /all/ nodes with that tag, even if they match other filters.
+- Hard Block: In the sidebar, click the Eye Icon next to a tag to hide all nodes with that tag, even if they match other filters.
 
-![org-roam-timeline](media/tag.gif)
+![org-roam-timeline-tag](media/tag.gif)
 
 ## Features
 - Bi-Directional Sync:
@@ -127,7 +127,7 @@ You can manipulate these filters and behaviours without leaving your emacs.
 - org-roam-timeline-filter-reset: clear all the filters.
 - org-roam-timeline-filter-hide-all: hide all nodes, from there, you decide what to see.
 
-[org-roam-timeline](media/follow.gif)
+![org-roam-timeline-follow](media/follow.gif)
 
 ## Licence
 
