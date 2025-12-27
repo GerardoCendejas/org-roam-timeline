@@ -1,11 +1,28 @@
-;;; org-roam-timeline.el --- Timeline with Content Preview & Navigation -*- lexical-binding: t; -*-
+;;; org-roam-timeline.el --- Visual timeline for Org-Roam nodes  -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2025 Gerardo Cendejas Mendoza
+
+;; Author: Gerardo Cendejas Mendoza <gc597@cornell.edu>
+;; Maintainer: Gerardo Cendejas Mendoza <gc597@cornell.edu>
+;; Version: 0.1.0
+;; Package-Requires: ((emacs "27.1") (org-roam "2.0") (json-mode "1.0") (simple-httpd "1.5.1")) 
+;; Keywords: org, hypermedia, visualization, timeline
+;; URL: https://github.com/GerardoCendejas/org-roam-timeline
+
+;;; Commentary:
+;;  This package provides a visual timeline interface for Org-Roam nodes.
+
+;;; Code:
+
 
 (require 'org-roam)
 (require 'simple-httpd)
 (require 'json)
 (require 'ox-html)
 
-(defvar org-roam-timeline-root (file-name-directory (or load-file-name buffer-file-name)))
+(defconst org-roam-timeline-root
+  (file-name-directory (or load-file-name buffer-file-name))
+  "Directorio raíz donde está instalado el paquete org-roam-timeline.")
 
 ;; --- SIGNALS ---
 (defvar org-roam-timeline--explicit-focus-id nil)
@@ -166,7 +183,12 @@
 (defservlet* remove-date text/plain (id) (let ((node (org-roam-node-from-id id))) (if node (let ((file (org-roam-node-file node)) (point (org-roam-node-point node))) (with-current-buffer (find-file-noselect file) (goto-char point) (org-delete-property "TIMELINE_START") (org-delete-property "TIMELINE_END") (save-buffer)) (insert "Removed")) (insert "Node not found"))))
 
 ;; --- INTERACTIVE COMMANDS ---
-(defun org-roam-timeline-open () (interactive) (setq httpd-root (expand-file-name "html" org-roam-timeline-root)) (httpd-start) (browse-url (format "http://localhost:%d" httpd-port)))
+(defun org-roam-timeline-open () 
+  (interactive) 
+  ;; Asegúrate de que esta línea quede así:
+  (setq httpd-root (expand-file-name "html" org-roam-timeline-root))
+  (httpd-start) 
+  (browse-url (format "http://localhost:%d" httpd-port)))
 
 (defun org-roam-timeline-show-node () (interactive) (let ((node (org-roam-node-at-point))) (if node (progn (setq org-roam-timeline--explicit-focus-id (org-roam-node-id node)) (message "Timeline: Show Node")) (user-error "No node at point"))))
 (defun org-roam-timeline-hide-node () (interactive) (let ((node (org-roam-node-at-point))) (if node (progn (setq org-roam-timeline--explicit-hide-id (org-roam-node-id node)) (message "Timeline: Hide Node")) (user-error "No node at point"))))
@@ -188,3 +210,5 @@
 (defun org-roam-timeline-filter-hide-all () (interactive) (setq org-roam-timeline--filter-signal (cons "filter-hide-all" "all")) (message "Timeline: Hiding all tags (Blank Slate)."))
 
 (provide 'org-roam-timeline)
+
+;;; org-roam-timeline.el ends here
