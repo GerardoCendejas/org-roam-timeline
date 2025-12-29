@@ -1,4 +1,5 @@
 ;;; org-roam-timeline.el --- Visual timeline for Org-Roam nodes  -*- lexical-binding: t; -*-
+;; SPDX-License-Identifier: GPL-3.0-or-later
 
 ;; Copyright (C) 2025 Gerardo Cendejas Mendoza
 
@@ -8,6 +9,21 @@
 ;; Package-Requires: ((emacs "27.1") (org-roam "2.0") (json-mode "1.0") (simple-httpd "1.5.1"))
 ;; Keywords: org, hypermedia, visualization, timeline
 ;; URL: https://github.com/GerardoCendejas/org-roam-timeline
+
+;; License: GPL-3.0-or-later
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;  This package provides a visual timeline interface for Org-Roam nodes.
@@ -59,7 +75,7 @@
 ;; --- DATA PROCESSING ---
 (defun org-roam-timeline--process-node (node)
   "Process an Org-roam NODE to extract time and structure metadata."
-  (condition-case err
+  (condition-case _err
       (let* ((props (org-roam-node-properties node))
              (id (org-roam-node-id node))
              (start-raw (cdr (assoc "TIMELINE_START" props)))
@@ -75,7 +91,7 @@
                  (all-neighbors (append incoming-ids outgoing-ids))
                  (backlink-count (length backlinks))
                  (importance-class (cond ((> backlink-count 10) "item-huge") ((> backlink-count 5) "item-large") (t "item-small"))))
-            
+
             `((id . ,id)
               (content . ,(org-roam-node-title node))
               (title . "Metadata")
@@ -141,7 +157,7 @@
 ;; --- POLLING SERVLET ---
 (defservlet* current-focus text/json ()
   (let ((response '((action . "none"))))
-    
+
     ;; 1. Filters
     (when org-roam-timeline--filter-signal
       (setq response `((action . ,(car org-roam-timeline--filter-signal))
@@ -192,18 +208,17 @@
                   (when node (setq node-id (org-roam-node-id node))))))
             (when node-id
               (setq response `((action . "follow") (id . ,node-id)))))))
-    
+
     (insert (json-encode response))))
 
 (defservlet* remove-date text/plain (id) (let ((node (org-roam-node-from-id id))) (if node (let ((file (org-roam-node-file node)) (point (org-roam-node-point node))) (with-current-buffer (find-file-noselect file) (goto-char point) (org-delete-property "TIMELINE_START") (org-delete-property "TIMELINE_END") (save-buffer)) (insert "Removed")) (insert "Node not found"))))
 
 ;; --- INTERACTIVE COMMANDS ---
-;; --- INTERACTIVE COMMANDS ---
 (defun org-roam-timeline-open ()
   "Start the web server and open the timeline in the browser."
-  (interactive) 
+  (interactive)
   (setq httpd-root (expand-file-name "html" org-roam-timeline-root))
-  (httpd-start) 
+  (httpd-start)
   (browse-url (format "http://localhost:%d" httpd-port)))
 
 (defun org-roam-timeline-show-node ()
@@ -232,16 +247,16 @@
   (setq org-roam-timeline--toggle-follow-signal t)
   (message "Timeline: Toggled Follow Mode"))
 
-(defun org-roam-timeline-toggle-preview () 
+(defun org-roam-timeline-toggle-preview ()
   "Toggle Auto-Preview (sidebar content) in the browser."
-  (interactive) 
-  (setq org-roam-timeline--toggle-preview-signal t) 
+  (interactive)
+  (setq org-roam-timeline--toggle-preview-signal t)
   (message "Timeline: Toggled Auto-Preview"))
 
 (defun org-roam-timeline-tag-add ()
   "Add a tag to the current node, with completion for existing tags."
   (interactive)
-  (let* ((node (org-roam-node-at-point))
+  (let* ( ;;(node (org-roam-node-at-point))  ;; Not needed since org-roam-tag-add works on current buffer, unused variable
          (existing-tags (org-roam-db-query [:select :distinct tag :from tags]))
          (flat-tags (mapcar #'car existing-tags))
          (choice (completing-read "Tag: " flat-tags nil nil nil nil)))
