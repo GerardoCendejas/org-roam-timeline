@@ -1,5 +1,7 @@
 # org-roam-timeline: A visual interface for org-roam dated nodes.
 
+[![MELPA](https://melpa.org/packages/org-roam-timeline-badge.svg)](https://melpa.org/#/org-roam-timeline)
+
 ![org-roam-timeline](media/main.gif)
 
 **Table of Contents**
@@ -15,26 +17,14 @@ It is designed for researchers, historians, and anyone who needs to see **when**
 
 ## Installation
 
-### Clone repo
+### Use-package
 
-`org-roam-timeline` is yet not on MELPA, but you can still use it
-
-```bash
-
-git clone https://github.com/GerardoCendejas/org-roam-timeline.git
-
-```
-
-### Emacs config
-
-You then should add something like this to your `init.el`, this are the keybindings that I find useful, but feel free to change them.
+Using `use-package` (Recommended). You should add something like this to your `init.el`, this are the keybindings that I find useful, but feel free to change them.
 
 ```emacs-lisp
 
 (use-package org-roam-timeline
        :after org-roam
-       :load-path "~/.emacs.d/lisp/org-roam-timeline/"  ; Adjust path as needed
-       
        :bind (("C-c n p" . org-roam-timeline-open)       ; Open the Timeline View
               ("C-c n d" . org-roam-timeline-add-date)   ; Add/Edit Timeline Date
               ("C-c n s" . org-roam-timeline-show-node)  ; Force Show Node in Browser
@@ -42,9 +32,6 @@ You then should add something like this to your `init.el`, this are the keybindi
               ("C-c n t" . org-roam-timeline-tag-add)    ; Add Tag (Smart Completion)
 	      ("C-c n z" . org-roam-timeline-zoom-date)  ; Focus the view on a specified date
      	 )
-     	 
-       
-       :custom
        
        ;; Default zoom range (years) when focusing a single point
        (org-roam-timeline-focus-window-years 5)
@@ -64,6 +51,36 @@ You then should add something like this to your `init.el`, this are the keybindi
 ```
 
 Check other functions included that you could bind if you want complete control from emacs.
+
+### From source
+
+#### Clone repo
+
+`org-roam-timeline` is NOW ON MELPA, but you can also use it from the github repo:
+
+```bash
+
+git clone https://github.com/GerardoCendejas/org-roam-timeline.git
+
+```
+
+### Emacs config
+
+```emacs-lisp
+
+(use-package org-roam-timeline
+       :after org-roam
+       :load-path "~/.emacs.d/lisp/org-roam-timeline/"  ; Adjust path as needed
+       :bind (("C-c n p" . org-roam-timeline-open)       ; Open the Timeline View
+              ("C-c n d" . org-roam-timeline-add-date)   ; Add/Edit Timeline Date
+              ("C-c n s" . org-roam-timeline-show-node)  ; Force Show Node in Browser
+     	      ("C-c n h" . org-roam-timeline-hide-node)  ; Force Hide Node in Browser
+              ("C-c n t" . org-roam-timeline-tag-add)    ; Add Tag (Smart Completion)
+	      ("C-c n z" . org-roam-timeline-zoom-date)  ; Focus the view on a specified date
+     	 )
+
+	 ;; Other bindings
+```
 
 ### Customization
 
