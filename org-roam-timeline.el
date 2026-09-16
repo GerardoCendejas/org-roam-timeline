@@ -5,7 +5,7 @@
 
 ;; Author: Gerardo Cendejas Mendoza <gc597@cornell.edu>
 ;; Maintainer: Gerardo Cendejas Mendoza <gc597@cornell.edu>
-;; Version: 0.1.0
+;; Version: 1.1
 ;; Package-Requires: ((emacs "27.1") (org-roam "2.0") (json-mode "1.0") (simple-httpd "1.5.1"))
 ;; Keywords: org, hypermedia, visualization, timeline
 ;; URL: https://github.com/GerardoCendejas/org-roam-timeline
