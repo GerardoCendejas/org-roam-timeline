@@ -1,6 +1,7 @@
 # org-roam-timeline: A visual interface for org-roam dated nodes.
 
 [![MELPA](https://melpa.org/packages/org-roam-timeline-badge.svg)](https://melpa.org/#/org-roam-timeline)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22781308.svg)](https://doi.org/10.5281/zenodo.22781308)
 
 ![org-roam-timeline](media/main.gif)
 
