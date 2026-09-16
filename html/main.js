@@ -277,14 +277,28 @@ setInterval(() => {
 }, 1000);
 
 // --- Helpers ---
-function handleDateZoom(dateStr) {
-    let start, end;
-    const parts = dateStr.split('-');
-    if (parts.length === 1) { start = new Date(`${parts[0]}-01-01`); end = new Date(`${parts[0]}-12-31 23:59:59`); } 
-    else if (parts.length === 2) { start = new Date(`${dateStr}-01`); end = new Date(parts[0], parts[1], 0, 23, 59, 59); } 
-    else { start = new Date(`${dateStr} 00:00:00`); end = new Date(`${dateStr} 23:59:59`); }
+// Parses "-?YYYY", "-?YYYY-MM" or "-?YYYY-MM-DD" (BCE years use a leading "-", with setFullYear)
+function parseTimelineDate(value) {
+    if (value instanceof Date || typeof value !== 'string') return new Date(value);
+    const m = value.match(/^(-?\d+)(?:-(\d{2})(?:-(\d{2}))?)?$/);
+    if (!m) return new Date(value); // fallback for anything unexpected
+    const d = new Date(0);
+    d.setFullYear(parseInt(m[1], 10), m[2] ? parseInt(m[2], 10) - 1 : 0, m[3] ? parseInt(m[3], 10) : 1);
+    d.setHours(0, 0, 0, 0);
+    return d;
+}
 
+function handleDateZoom(dateStr) {
+    const m = dateStr.trim().match(/^(-?\d+)(?:-(\d{2})(?:-(\d{2}))?)?$/);
+    if (!m) return;
+    const start = parseTimelineDate(dateStr);
     if (isNaN(start.getTime())) return;
+    const end = new Date(start);
+    if (m[3]) { /* full date: end = same day */ }
+    else if (m[2]) { end.setMonth(end.getMonth() + 1, 0); } // last day of that month
+    else { end.setFullYear(end.getFullYear() + 1, 0, 0); } // last day of that year
+    end.setHours(23, 59, 59, 999);
+
     const padding = (end.getTime() - start.getTime()) * 0.5;
     timeline.setWindow(new Date(start.getTime() - padding), new Date(end.getTime() + padding), { animation: { duration: 1000 } });
 
@@ -324,7 +338,7 @@ function closePreview() { document.getElementById('preview-panel').classList.rem
 function stringToColor(str) { let hash = 0; for (let i=0; i<str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash); const h = Math.abs(hash % 360); const isLight = document.body.classList.contains('light-mode'); return `hsl(${h}, ${isLight?65:55}%, ${isLight?85:30}%)`; }
 function assignColorToItem(item) { const tag = (item.all_tags && item.all_tags.length) ? item.all_tags[0] : "Uncategorized"; const bg = stringToColor(tag); const txt = document.body.classList.contains('light-mode') ? '#333' : '#eee'; item.style = `background-color: ${bg}; border-color: ${bg}; color: ${txt};`; const baseClass = (item.className || "").split(' node-')[0]; item.className = `${baseClass} node-${item.id}`; }
 function toggleTheme() { document.body.classList.toggle('light-mode'); const updates = []; rawData.forEach(item => { assignColorToItem(item); updates.push(item); }); rawData.update(updates); renderFilters(); requestAnimationFrame(drawConnections); }
-function loadData() { fetch('/org-roam-timeline-data').then(r=>r.json()).then(data => { const uniqueTags = new Set(); data.forEach(item => { if(!item.all_tags) item.all_tags = ["Uncategorized"]; item.all_tags.forEach(t=>uniqueTags.add(t)); assignColorToItem(item); delete item.title; }); allKnownTags = [...uniqueTags].sort(); if(activeTags.size===0) activeTags = new Set(allKnownTags); renderFilters(); rawData.clear(); rawData.update(data); timeline.fit(); updateButtonStates(); }); }
+function loadData() { fetch('/org-roam-timeline-data').then(r=>r.json()).then(data => { const uniqueTags = new Set(); data.forEach(item => { if(!item.all_tags) item.all_tags = ["Uncategorized"]; item.all_tags.forEach(t=>uniqueTags.add(t)); assignColorToItem(item); delete item.title; item.start = parseTimelineDate(item.start); if (item.end) item.end = parseTimelineDate(item.end); }); allKnownTags = [...uniqueTags].sort(); if(activeTags.size===0) activeTags = new Set(allKnownTags); renderFilters(); rawData.clear(); rawData.update(data); timeline.fit(); updateButtonStates(); }); }
 function updateButtonStates() { 
     const linkBtn = document.getElementById('link-btn'); if (showLinks) linkBtn.classList.add('active'); else linkBtn.classList.remove('active');
     const prevBtn = document.getElementById('preview-toggle-btn'); if (autoOpenPreview) prevBtn.classList.add('active'); else prevBtn.classList.remove('active');

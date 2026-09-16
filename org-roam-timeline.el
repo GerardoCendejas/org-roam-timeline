@@ -116,8 +116,9 @@
   (when (stringp date-str)
     (let ((clean (string-trim date-str)))
       (cond
-       ((string-match "^-?[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}$" clean) clean)
-       ((string-match "^\\(-?[0-9]\\{4\\}\\)$" clean)
+       ;; Accpt also non 4 digit years (like 202, 2023, -500, etc.)
+       ((string-match "^-?[0-9]+-[0-9]\\{2\\}-[0-9]\\{2\\}$" clean) clean)
+       ((string-match "^\\(-?[0-9]+\\)$" clean)
         (if is-end (concat (match-string 1 clean) "-12-31") (concat (match-string 1 clean) "-01-01")))
        ((string-match "[\\[<]\\(-?[0-9]+\\S-*\\)[\\]>]" clean) (match-string 1 clean))
        (t nil)))))
